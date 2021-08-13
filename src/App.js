@@ -1,12 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 import CategoryList from './CategoryList';
 import SelectCategorys from './SelectCategorys'
 import uuidv4 from 'uuid/dist/v4'
 
-const LOCAL_STORAGE_KEY = 'todoApp.todos'
-const LOCAL_STORAGE_CATEGORY_KEY = 'todoApp.categories'
 let beforeSearch =[];
 let beforeCategorySearch = [];
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCsGUPi9kWLA7LTIQORom63ilptAlrxRxw",
+  authDomain: "learn-todo-list-react.firebaseapp.com",
+  databaseURL: "https://learn-todo-list-react-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "learn-todo-list-react",
+  storageBucket: "learn-todo-list-react.appspot.com",
+  messagingSenderId: "678182673838",
+  appId: "1:678182673838:web:21b7d3017c29f0de63bc3f",
+  measurementId: "G-CN8VGB7J4N"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const dbRef = firebase.firestore().collection('todos')
 
 function App() {
 
@@ -16,30 +30,23 @@ function App() {
   const todoRefs = useRef([]);
 
   
-
-  
-// saving to localstorage
+  // reading from firebase
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
-    if(stored) setTodos(stored)
-    // if(stored) setTodos([])
-    const storedc = JSON.parse(localStorage.getItem(LOCAL_STORAGE_CATEGORY_KEY))
 
-    if(storedc.length === 0) setCategory([{id: uuidv4(), name:'default'}])
-    else setCategory(storedc)
-    
-    // if(storedc) setCategory([])
+    let tmp = []
+    dbRef.get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        let data = doc.data();
+        setTodos(prevTodos => [...prevTodos, {id: data.id, docId: doc.id, name: data.name, complete: data.complete, category: data.category}])
+          if (!tmp.includes(doc.data().category)) {
+            setCategory(prevCategory => [...prevCategory, { id: uuidv4(), name: doc.data().category }])
+            tmp = [...tmp, doc.data().category];
+          }
+      });
+    })
+
     
   }, [])
-
-  // reading from localstorage
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
-  }, [todos])
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_CATEGORY_KEY, JSON.stringify(categories))
-  }, [categories])
-
 
   function handleSearchTodo(){
     // get search name
@@ -116,6 +123,7 @@ function App() {
     const name = todoRefs.current['name'].value
 
     const selectedRef = selected;
+    console.log(selectedRef)
 
     let selectedValue = 'default';
 
@@ -129,19 +137,35 @@ function App() {
         })
     }
     
+    
+    if (name === '') return
 
-    if(name === '') return 
-
+    const id = uuidv4();
     setTodos(prevTodos=>{
-      return [...prevTodos, {id: uuidv4(), name: name, complete: false, category: selectedValue} //, categories: categories}
-      ]})
-      todoRefs.current['name'].value = null
+      return [...prevTodos, {id: id, name: name, complete: false, category: selectedValue} //, categories: categories}
+      ]
+    })
+
+    dbRef.doc().set({
+      "id": id,
+      "name": name,
+      "category": selectedValue,
+      "complete": false,
+      
+    })
+    todoRefs.current['name'].value = null
 
 
   }
   function handleClearTodo(){
     const newTodos = [...todos]
     const ntodos = newTodos.filter(todo=> !todo.complete)
+    const toDelete = newTodos.filter(todo => todo.complete)
+    
+    toDelete.forEach((todo) => {
+      dbRef.doc(todo.docId).delete();
+    })
+
     setTodos(ntodos)
   }
   function toggleTodo(id){
@@ -149,6 +173,7 @@ function App() {
     const todo = newTodo.find(todo => todo.id === id)
     todo.complete = !todo.complete
     setTodos(newTodo)
+    dbRef.doc(todo.docId).update({complete: todo.complete});
   }
   function handleAddCategory(){
     const name = todoRefs.current['categoryName'].value
