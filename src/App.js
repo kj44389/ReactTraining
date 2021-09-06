@@ -3,9 +3,11 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import CategoryList from './CategoryList';
 import SelectCategorys from './SelectCategorys'
-import uuidv4 from 'uuid/dist/v4'
+import { v4 } from 'uuid'
 
-let beforeSearch =[];
+// global arrays - here are saved all todos and categorys before starting to searching
+// after clearing search input data is imported from this arrays  
+let beforeSearch = [];
 let beforeCategorySearch = [];
 
 const firebaseConfig = {
@@ -18,6 +20,7 @@ const firebaseConfig = {
   appId: "1:678182673838:web:21b7d3017c29f0de63bc3f",
   measurementId: "G-CN8VGB7J4N"
 };
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.firestore().collection('todos')
@@ -39,7 +42,7 @@ function App() {
         let data = doc.data();
         setTodos(prevTodos => [...prevTodos, {id: data.id, docId: doc.id, name: data.name, complete: data.complete, category: data.category}])
           if (!tmp.includes(doc.data().category)) {
-            setCategory(prevCategory => [...prevCategory, { id: uuidv4(), name: doc.data().category }])
+            setCategory(prevCategory => [...prevCategory, { id: v4(), name: doc.data().category }])
             tmp = [...tmp, doc.data().category];
           }
       });
@@ -133,14 +136,14 @@ function App() {
       if(categories.length <= 0)
       setCategory(prevCategory => 
         { 
-          return [...prevCategory, {id:uuidv4(), name: selectedValue}]
+          return [...prevCategory, {id:v4(), name: selectedValue}]
         })
     }
     
     
     if (name === '') return
 
-    const id = uuidv4();
+    const id = v4();
     setTodos(prevTodos=>{
       return [...prevTodos, {id: id, name: name, complete: false, category: selectedValue} //, categories: categories}
       ]
@@ -181,7 +184,7 @@ function App() {
     if(name === '') return 
     // if(categories === '') categories = 'default' 
     setCategory(prevCategory=>{
-      return [...prevCategory, {id: uuidv4(), name: name} //, categories: categories}
+      return [...prevCategory, {id: v4(), name: name} //, categories: categories}
       ]})
 
   }
