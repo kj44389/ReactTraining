@@ -12,11 +12,11 @@ React ( hooks ) - firebase (firestore)
 ![adding todos](https://github.com/kj44389/ReactTraining/blob/firebase-database/github_readme/todo_app2.jpg?raw=true "adding todos")
 
 
-![selecting categories](https://github.com/kj44389/ReactTraining/blob/firebase-database/github_readme/todo_app3.jpg?raw=true "selecting categories")
+![selecting categories](https://github.com/kj44389/ReactTraining/blob/firebase-database/github_readme/todo_app3.jpg?raw=true "selecting category")
 
 
 ![adding todos to new category](https://github.com/kj44389/ReactTraining/blob/firebase-database/github_readme/todo_app4.jpg?raw=true "adding todos to new category")
 
 
-![searching todos by category and name](https://github.com/kj44389/ReactTraining/blob/firebase-database/github_readme/todo_app5.jpg?raw=true "searching todos by category and name")
+![searching todos by category and name](https://github.com/kj44389/ReactTraining/blob/firebase-database/github_readme/todo_app5.jpg?raw=true "searching todos by category and todo name")
 
